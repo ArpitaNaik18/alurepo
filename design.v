@@ -49,8 +49,9 @@ else if (CE) begin
             case (CMD)
 
             4'b0000: begin
-                RES <= OPA + OPB;
-                COUT <= RES[WIDTH];
+                temp = OPA + OPB;
+                RES <= temp;
+                COUT <= temp[WIDTH];
             end
 
             4'b0001: begin
@@ -59,8 +60,9 @@ else if (CE) begin
             end
 
             4'b0010: begin
-                RES <= OPA + OPB + CIN;
-                COUT <= RES[WIDTH];
+                temp = OPA + OPB + CIN;
+                RES <= temp;
+                COUT <= temp[WIDTH];
             end
 
             4'b0011: begin
@@ -79,10 +81,11 @@ else if (CE) begin
                 case (mul_cnt)
 
                 2'd0: begin
-                    opa_reg <= OPA + 1;
-                    opb_reg <= OPB + 1;
+                    opa_reg <= OPA;
+                    opb_reg <= OPB;
                     mode_reg <= MODE;
                     mul_cnt <= 1;
+                    RES <= 0;
                 end
 
                 2'd1: begin
@@ -90,20 +93,29 @@ else if (CE) begin
                         RES <= 0;
                         mul_cnt <= 0;
                     end else begin
-                        mul_temp <= opa_reg * opb_reg;
                         mul_cnt <= 2;
+                        RES <= 0;
                     end
                 end
 
                 2'd2: begin
                     if (MODE != mode_reg) begin
                         RES <= 0;
+                        mul_cnt <= 0;
                     end else begin
+                        mul_temp = (opa_reg + 1) * (opb_reg + 1);
                         RES <= mul_temp;
                         COUT <= |mul_temp[2*WIDTH-1:WIDTH];
                         OFLOW <= COUT;
+
+                        if (CMD == 4'b1001) begin
+                            opa_reg <= OPA;
+                            opb_reg <= OPB;
+                            mul_cnt <= 1;
+                        end else begin
+                            mul_cnt <= 0;
+                        end
                     end
-                    mul_cnt <= 0;
                 end
 
                 endcase
@@ -111,7 +123,7 @@ else if (CE) begin
 
             4'b1011: begin
                 temp = $signed(OPA) + $signed(OPB);
-                RES<=temp;
+                RES <= temp;
                 COUT <= temp[WIDTH];
 
                 OFLOW <= (OPA[WIDTH-1] == OPB[WIDTH-1]) &&
@@ -201,8 +213,20 @@ else if (CE) begin
 
         endcase
     end
+
+end
+
+else begin
+    RES   <= 0;
+    OFLOW <= 0;
+    COUT  <= 0;
+    G     <= 0;
+    L     <= 0;
+    E     <= 0;
+    ERR   <= 0;
 end
 
 end
 
 endmodule
+
