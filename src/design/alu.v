@@ -1,3 +1,31 @@
+`timescale 1ns / 1ps
+module ALU #(
+parameter WIDTH = 8,
+parameter CMD_WIDTH = 4
+)(
+input [WIDTH-1:0] OPA,
+input [WIDTH-1:0] OPB,
+input CIN,
+input CLK,
+input RST,
+input CE,
+input MODE,
+input [1:0] INP_VALID,
+input [CMD_WIDTH-1:0] CMD,
+
+output reg [2*WIDTH-1:0] RES,
+output reg OFLOW,
+output reg COUT,
+output reg G, L, E,
+output reg ERR
+);
+
+reg signed [WIDTH:0] temp;
+
+reg [1:0] mul_cnt;
+reg [WIDTH-1:0] opa_reg, opb_reg;
+reg [2*WIDTH-1:0] mul_temp;
+reg mode_reg;
 
 reg [WIDTH-1:0] opa_d, opb_d;
 reg cin_d;
